@@ -9,12 +9,12 @@ from phi.document.reader.pdf import PDFReader
 from phi.llm.groq import Groq
 from phi.embedder.ollama import OllamaEmbedder
 from phi.knowledge import AssistantKnowledge
-from phi.tools.wikipedia import WikipediaTools  
+from phi.tools.googlesearch import GoogleSearch
 from phi.vectordb.pgvector import PgVector2
 from phi.storage.assistant.postgres import PgAssistantStorage
 
 
-os.environ["GROQ_API_KEY"] = "Your GROQ_API_KEY"  # Replace with your actual GROQ API key
+os.environ["GROQ_API_KEY"] = "Insert_Your_GROQ_API_KEY"  # Replace with your actual GROQ API key
 
 db_url = "postgresql+psycopg://ai:ai@localhost:5532/ai"
 logger = logging.getLogger(__name__)
@@ -35,19 +35,19 @@ def setup_assistant(llm) -> Assistant:
         description="You are a helpful Assistant called 'AutoRAG' and your goal is to assist the user in the best way possible.",
         instructions=[
             "Given a user query, first ALWAYS search your knowledge base using the `search_knowledge_base` tool to see if you have relevant information.",
-            "If you don't find relevant information in your knowledge base, use your search tool ONCE to find the answer.",
+            "If you don't find relevant information in your knowledge base, use the `google_search` tool ONCE to find the answer.",
             "Carefully read the information you have gathered and provide a clear and concise answer to the user.",
             "Do not use phrases like 'based on my knowledge' or 'depending on the information'.",
         ],
-        show_tool_calls=True,
+        show_tool_calls=False,
         search_knowledge=True,
         read_chat_history=True,
-        tools=[WikipediaTools()],
+        tools=[GoogleSearch()],
         function_call_limit=3,
         markdown=True,
         add_chat_history_to_messages=True,
         add_datetime_to_instructions=True,
-        debug_mode=True,
+        debug_mode=False,
     )
 
 def add_document_to_kb(assistant: Assistant, file_path: str):
@@ -65,12 +65,19 @@ def query_assistant(assistant: Assistant, question: str):
 
 if __name__ == "__main__":
     nest_asyncio.apply()
-    llm = Groq(model="Place Model Name", api_key=os.getenv("GROQ_API_KEY"))  
+    llm = Groq(model="Insert Your Model Name", api_key=os.getenv("GROQ_API_KEY"))  
     assistant = setup_assistant(llm)
 
     add_document_to_kb(assistant, "sample.pdf")
 
-    query = "who won asia cup 2023?"
+    query = "who won men's cricket asia cup 2023?"
     response = query_assistant(assistant, query)
     print("Query:", query)
     print("Response:", response)
+
+    # Response ko text file mein save karne ke liye:
+    with open("output.txt", "w", encoding="utf-8") as f:
+        f.write(f"Query: {query}\n\n")
+        f.write(f"Response:\n{response}\n")
+
+    print("Response saved to output.txt")
