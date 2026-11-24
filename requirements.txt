@@ -1,0 +1,10 @@
+phidata 
+nest_asyncio 
+beautifulsoup4 
+Groq
+sqlalchemy 
+pgvector 
+psycopg 
+pypdf 
+ollama
+wikipedia   
